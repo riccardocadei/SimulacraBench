@@ -6,6 +6,7 @@ surveys converted to the competition format, never on competition answers.
 | Script | Report | What it does |
 |---|---|---|
 | `ladder.py` | Table 1 | Skill of the crowd marginal, TabPFN-3.5 off the shelf, the fine-tuned TabPFN alone, and the full pipeline |
+| `ablation.py` | Table 2 | Skill lost when one part of the pipeline is removed |
 
 ## Data
 
@@ -51,3 +52,31 @@ Check, UNICEF stand-in, split 41, on an H100:
 Table 1 of the report is the mean of three splits (and two fine-tuning seeds), measured on an earlier build of
 the pipeline, before the World Bank changes; single runs differ from it by the split-to-split spread (about
 0.002 on this dataset) and are not bit-reproducible.
+
+## Table 2: what each part buys
+
+```bash
+python experiments/ablation.py unicef     bench/rs41_wgm_unicef
+python experiments/ablation.py unhcr      bench/rs41_arab_barometer_real
+python experiments/ablation.py world_bank bench/rs41_afrowb76
+```
+
+The pipeline is fitted once and every member's output is kept in memory; each arm then repeats the run with one
+part removed (see the script's docstring). Five arms reuse the stored members, so their difference from the full
+run is exact; `distillation` and `finetuning` refit members. The UNICEF stand-in takes about 8 minutes on an H100;
+the other two were not rerun with this script.
+
+Check, UNICEF stand-in, split 41, on an H100, skill lost in units of 10⁻⁴:
+
+| Arm | This script, one split | Report, mean of several splits |
+|---|---|---|
+| `tabpfn_member` | 1.6 | 1.4 |
+| `networks` | 3.6 | 3.1 |
+| `geometric_pool` | 1.4 | 2.0 |
+| `optimism` | 0.1 | 0.0 |
+| `floor` | 2.4 | 1.5 |
+| `distillation` | 1.0 | 1.0 |
+| `finetuning` | 1.9 | 1.6 |
+
+The report's table also has a row for the World Bank weight snapshot. It is not an arm here, because removing it
+needs a second fine-tuning run, and two fine-tuning runs differ by an amount comparable to the effect.
