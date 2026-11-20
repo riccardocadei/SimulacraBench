@@ -7,6 +7,7 @@ surveys converted to the competition format, never on competition answers.
 |---|---|---|
 | `ladder.py` | Fig. 1b; baselines table of the appendix | Skill of the crowd marginal, TabPFN-3.5 off the shelf, the fine-tuned TabPFN alone, and the full pipeline |
 | `ablation.py` | Table 1 | Skill lost when one part of the pipeline is removed |
+| `priors_figure.py` | Appendix figure "Priors against data" | Redraws the figure from the saved curves in `data/priors_vs_data.json` (no GPU) |
 
 ## Data
 

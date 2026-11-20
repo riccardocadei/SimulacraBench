@@ -1,0 +1,462 @@
+{
+ "Afrobarometer": [
+  {
+   "train_share": 0.015625,
+   "respondents": 115,
+   "skill": 0.01632,
+   "group_ceiling": 0.039545,
+   "answer_prior": [
+    0.001732,
+    0.000106
+   ],
+   "structure_prior": [
+    0.002523,
+    0.000169
+   ]
+  },
+  {
+   "train_share": 0.03125,
+   "respondents": 229,
+   "skill": 0.038873,
+   "group_ceiling": 0.020859,
+   "answer_prior": [
+    0.001313,
+    0.000124
+   ],
+   "structure_prior": [
+    0.002609,
+    0.000213
+   ]
+  },
+  {
+   "train_share": 0.0625,
+   "respondents": 459,
+   "skill": 0.059446,
+   "group_ceiling": 0.008164,
+   "answer_prior": [
+    0.001283,
+    0.000153
+   ],
+   "structure_prior": [
+    0.002508,
+    0.00019
+   ]
+  },
+  {
+   "train_share": 0.125,
+   "respondents": 918,
+   "skill": 0.076997,
+   "group_ceiling": 0.002228,
+   "answer_prior": [
+    0.001718,
+    0.000176
+   ],
+   "structure_prior": [
+    0.001793,
+    0.000201
+   ]
+  },
+  {
+   "train_share": 0.25,
+   "respondents": 1836,
+   "skill": 0.091466,
+   "group_ceiling": 0.00035,
+   "answer_prior": [
+    0.001173,
+    0.000164
+   ],
+   "structure_prior": [
+    0.001199,
+    0.000218
+   ]
+  },
+  {
+   "train_share": 0.5,
+   "respondents": 3672,
+   "skill": 0.1043,
+   "group_ceiling": 6.3e-05,
+   "answer_prior": [
+    0.000961,
+    0.000167
+   ],
+   "structure_prior": [
+    0.00053,
+    0.000196
+   ]
+  },
+  {
+   "train_share": 1,
+   "respondents": 7344,
+   "skill": 0.115695,
+   "group_ceiling": 0.0,
+   "answer_prior": [
+    8.6e-05,
+    0.000168
+   ],
+   "structure_prior": [
+    0.000617,
+    0.000187
+   ]
+  }
+ ],
+ "Arab Barometer": [
+  {
+   "train_share": 0.015625,
+   "respondents": 90,
+   "skill": 0.020421,
+   "group_ceiling": 0.034522,
+   "structure_prior": [
+    0.002173,
+    0.000172
+   ]
+  },
+  {
+   "train_share": 0.03125,
+   "respondents": 181,
+   "skill": 0.045314,
+   "group_ceiling": 0.015824,
+   "structure_prior": [
+    0.001485,
+    0.000199
+   ]
+  },
+  {
+   "train_share": 0.0625,
+   "respondents": 361,
+   "skill": 0.063359,
+   "group_ceiling": 0.006187,
+   "structure_prior": [
+    0.00097,
+    0.000187
+   ]
+  },
+  {
+   "train_share": 0.125,
+   "respondents": 721,
+   "skill": 0.083103,
+   "group_ceiling": 0.00115,
+   "structure_prior": [
+    0.000171,
+    0.000186
+   ]
+  },
+  {
+   "train_share": 0.25,
+   "respondents": 1442,
+   "skill": 0.096985,
+   "group_ceiling": 0.000119,
+   "structure_prior": [
+    6.2e-05,
+    0.000173
+   ]
+  },
+  {
+   "train_share": 0.5,
+   "respondents": 2884,
+   "skill": 0.108309,
+   "group_ceiling": 2.2e-05,
+   "structure_prior": [
+    0.000204,
+    0.000159
+   ]
+  },
+  {
+   "train_share": 1,
+   "respondents": 5769,
+   "skill": 0.118096,
+   "group_ceiling": 0.0,
+   "structure_prior": [
+    0.000294,
+    0.000151
+   ]
+  }
+ ],
+ "Wellcome Global Monitor": [
+  {
+   "train_share": 0.015625,
+   "respondents": 125,
+   "skill": 0.014344,
+   "group_ceiling": 0.037062,
+   "answer_prior": [
+    0.004475,
+    0.000431
+   ],
+   "structure_prior": [
+    -0.000426,
+    0.000133
+   ]
+  },
+  {
+   "train_share": 0.03125,
+   "respondents": 251,
+   "skill": 0.033046,
+   "group_ceiling": 0.021453,
+   "answer_prior": [
+    0.001782,
+    0.000239
+   ],
+   "structure_prior": [
+    0.000295,
+    0.000201
+   ]
+  },
+  {
+   "train_share": 0.0625,
+   "respondents": 502,
+   "skill": 0.047233,
+   "group_ceiling": 0.012312,
+   "answer_prior": [
+    0.000662,
+    0.000112
+   ],
+   "structure_prior": [
+    4.4e-05,
+    0.000171
+   ]
+  },
+  {
+   "train_share": 0.125,
+   "respondents": 1003,
+   "skill": 0.059484,
+   "group_ceiling": 0.005084,
+   "answer_prior": [
+    0.00024,
+    6e-05
+   ],
+   "structure_prior": [
+    0.000137,
+    0.000149
+   ]
+  },
+  {
+   "train_share": 0.25,
+   "respondents": 2006,
+   "skill": 0.067194,
+   "group_ceiling": 0.002396,
+   "answer_prior": [
+    9.7e-05,
+    3.9e-05
+   ],
+   "structure_prior": [
+    -7.1e-05,
+    0.00019
+   ]
+  },
+  {
+   "train_share": 0.5,
+   "respondents": 4014,
+   "skill": 0.073367,
+   "group_ceiling": 0.000835,
+   "answer_prior": [
+    3.1e-05,
+    2e-05
+   ],
+   "structure_prior": [
+    -0.000123,
+    0.000194
+   ]
+  },
+  {
+   "train_share": 1,
+   "respondents": 8028,
+   "skill": 0.078311,
+   "group_ceiling": 0.000222,
+   "answer_prior": [
+    2.5e-05,
+    1.2e-05
+   ],
+   "structure_prior": [
+    -0.000608,
+    0.000212
+   ]
+  }
+ ],
+ "UNICEF (practice file)": [
+  {
+   "train_share": 0.015625,
+   "respondents": 248,
+   "skill": 0.256892,
+   "group_ceiling": 0.000533
+  },
+  {
+   "train_share": 0.03125,
+   "respondents": 496,
+   "skill": 0.272501,
+   "group_ceiling": 8.6e-05
+  },
+  {
+   "train_share": 0.0625,
+   "respondents": 992,
+   "skill": 0.278446,
+   "group_ceiling": -3e-06
+  },
+  {
+   "train_share": 0.125,
+   "respondents": 1985,
+   "skill": 0.282934,
+   "group_ceiling": 0.0
+  },
+  {
+   "train_share": 0.25,
+   "respondents": 3970,
+   "skill": 0.285885,
+   "group_ceiling": 0.0
+  },
+  {
+   "train_share": 0.5,
+   "respondents": 7939,
+   "skill": 0.287461,
+   "group_ceiling": 0.0
+  },
+  {
+   "train_share": 1,
+   "respondents": 15877,
+   "skill": 0.288303,
+   "group_ceiling": 0.0
+  }
+ ],
+ "World Bank (practice file)": [
+  {
+   "train_share": 0.015625,
+   "respondents": 86,
+   "skill": 0.139981,
+   "group_ceiling": 0.034443,
+   "structure_prior": [
+    0.000187,
+    0.000143
+   ]
+  },
+  {
+   "train_share": 0.03125,
+   "respondents": 173,
+   "skill": 0.175692,
+   "group_ceiling": 0.011689,
+   "structure_prior": [
+    -0.000406,
+    0.000133
+   ]
+  },
+  {
+   "train_share": 0.0625,
+   "respondents": 346,
+   "skill": 0.196393,
+   "group_ceiling": 0.002975,
+   "structure_prior": [
+    -0.000276,
+    0.000118
+   ]
+  },
+  {
+   "train_share": 0.125,
+   "respondents": 693,
+   "skill": 0.209066,
+   "group_ceiling": 0.00048,
+   "structure_prior": [
+    -3e-06,
+    9.8e-05
+   ]
+  },
+  {
+   "train_share": 0.25,
+   "respondents": 1386,
+   "skill": 0.21597,
+   "group_ceiling": 5.1e-05,
+   "structure_prior": [
+    -0.000177,
+    8.6e-05
+   ]
+  },
+  {
+   "train_share": 0.5,
+   "respondents": 2771,
+   "skill": 0.219993,
+   "group_ceiling": -3.9e-05,
+   "structure_prior": [
+    6.7e-05,
+    7.4e-05
+   ]
+  },
+  {
+   "train_share": 1,
+   "respondents": 5542,
+   "skill": 0.222492,
+   "group_ceiling": 0.0,
+   "structure_prior": [
+    8.4e-05,
+    6.7e-05
+   ]
+  }
+ ],
+ "UNHCR (practice file)": [
+  {
+   "train_share": 0.015625,
+   "respondents": 130,
+   "skill": 0.193903,
+   "group_ceiling": 0.018152,
+   "structure_prior": [
+    -0.00034,
+    0.000154
+   ]
+  },
+  {
+   "train_share": 0.03125,
+   "respondents": 258,
+   "skill": 0.210468,
+   "group_ceiling": 0.007669,
+   "structure_prior": [
+    -0.000658,
+    0.000121
+   ]
+  },
+  {
+   "train_share": 0.0625,
+   "respondents": 518,
+   "skill": 0.221552,
+   "group_ceiling": 0.002241,
+   "structure_prior": [
+    -0.000694,
+    0.00011
+   ]
+  },
+  {
+   "train_share": 0.125,
+   "respondents": 1035,
+   "skill": 0.227854,
+   "group_ceiling": 0.0008,
+   "structure_prior": [
+    -0.00056,
+    9.4e-05
+   ]
+  },
+  {
+   "train_share": 0.25,
+   "respondents": 2069,
+   "skill": 0.231253,
+   "group_ceiling": 0.000229,
+   "structure_prior": [
+    -0.000472,
+    8.9e-05
+   ]
+  },
+  {
+   "train_share": 0.5,
+   "respondents": 4139,
+   "skill": 0.233047,
+   "group_ceiling": 7.9e-05,
+   "structure_prior": [
+    -0.000396,
+    8e-05
+   ]
+  },
+  {
+   "train_share": 1,
+   "respondents": 8279,
+   "skill": 0.233997,
+   "group_ceiling": 0.0,
+   "structure_prior": [
+    -0.000237,
+    7.3e-05
+   ]
+  }
+ ]
+}
