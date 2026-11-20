@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""From the crowd marginal to the full pipeline: the four rows of the report's Table 1, on one dataset.
+"""From the crowd marginal to the full pipeline: the four steps of the report's Fig. 1b, on one dataset.
 
     python experiments/ladder.py world_bank bench/afrowb76
     python experiments/ladder.py unicef bench/wgm_unicef --arms marginal offshelf --out results/ladder

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Skill lost when one part of the pipeline is removed: the rows of the report's Table 2, on one dataset.
+"""Skill lost when one part of the pipeline is removed: the report's Table 1, on one dataset.
 
     python experiments/ablation.py unicef bench/rs41_wgm_unicef
     python experiments/ablation.py world_bank bench/rs41_afrowb76 --arms networks geometric_pool

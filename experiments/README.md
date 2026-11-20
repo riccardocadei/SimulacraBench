@@ -5,8 +5,8 @@ surveys converted to the competition format, never on competition answers.
 
 | Script | Report | What it does |
 |---|---|---|
-| `ladder.py` | Table 1 | Skill of the crowd marginal, TabPFN-3.5 off the shelf, the fine-tuned TabPFN alone, and the full pipeline |
-| `ablation.py` | Table 2 | Skill lost when one part of the pipeline is removed |
+| `ladder.py` | Fig. 1b; baselines table of the appendix | Skill of the crowd marginal, TabPFN-3.5 off the shelf, the fine-tuned TabPFN alone, and the full pipeline |
+| `ablation.py` | Table 1 | Skill lost when one part of the pipeline is removed |
 
 ## Data
 
@@ -27,7 +27,7 @@ python scripts/resplit.py bench/afrobarometer bench/rs41_afrobarometer --seed 41
 python scripts/make_afrowb76.py bench/rs41_afrobarometer bench/rs41_afrowb76 1041   # World Bank's shape: 76 questions
 ```
 
-## Table 1: from the crowd marginal to the full pipeline
+## Fig. 1b: from the crowd marginal to the full pipeline
 
 ```bash
 python experiments/ladder.py unicef     bench/rs41_wgm_unicef
@@ -49,11 +49,11 @@ Check, UNICEF stand-in, split 41, on an H100:
 | `finetuned` | 0.0967 | 0.0967 |
 | `full` | 0.0971 | 0.0971 |
 
-Table 1 of the report is the mean of three splits (and two fine-tuning seeds), measured on an earlier build of
+The report's numbers are the mean of three splits (and two fine-tuning seeds), measured on an earlier build of
 the pipeline, before the World Bank changes; single runs differ from it by the split-to-split spread (about
 0.002 on this dataset) and are not bit-reproducible.
 
-## Table 2: what each part buys
+## Table 1: what each part buys
 
 ```bash
 python experiments/ablation.py unicef     bench/rs41_wgm_unicef
@@ -69,7 +69,7 @@ the other two were not rerun with this script.
 Check, UNICEF stand-in, split 41, on an H100, skill lost in units of 10⁻⁴ (negative: the part costs skill on this
 split):
 
-| Arm | This script, one split | Report's Table 2, mean of several splits |
+| Arm | This script, one split | Report's Table 1, mean of several splits |
 |---|---|---|
 | `tabpfn_member` | 1.4 | 1.4 |
 | `networks` | 3.6 | 3.1 |
