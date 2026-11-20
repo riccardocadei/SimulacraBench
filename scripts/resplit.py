@@ -3,7 +3,7 @@
 group held out (mechanics test for unseen groups).
 
     python scripts/resplit.py bench/afrobarometer bench/rs1_afrobarometer --seed 1 --dev 0.2
-    python scripts/resplit.py sandboxes/unicef_real scratch/unicef_unseen_zambia --column Country --value Zambia
+    python scripts/resplit.py sandboxes/unicef_real bench/unicef_unseen_zambia --column Country --value Zambia
 
 --seed: every row is TRAIN or DEV at random (DEV share --dev), so the development phase scores a split
 no earlier experiment has seen; with --dev 0.2 it holds about 3x as many people as the bench's DEV (6%).

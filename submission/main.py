@@ -1,4 +1,4 @@
-"""SimulacraBench submission v102.
+"""SimulacraBench submission.
 
 Every held-out cell is a prediction of P(answer to PREDICT question j | the person's GIVEN facts), learned at run
 time from the survey's visible people. The schema's routing is not assumed: "not asked" is an ordinary answer.
@@ -43,7 +43,7 @@ Environment: SIMBENCH_FT_EPOCHS caps the fine-tuning passes (pin it for reproduc
 of passes follows the clock); SIMBENCH_DEBUG prints progress and raises instead of falling back; SIMBENCH_STRICT=1
 runs the strict development path locally.
 
-Method and evidence: the paper (paper/). Version history and every experiment: docs/log.md.
+Method and evidence: the technical report (see the README).
 """
 
 import os
@@ -60,15 +60,15 @@ K_FOLDS = K_BASE          # this call's fold count (set by _predict)
 FOLDS10_MAX_ROWS = 15000  # above this many visible people the final keeps 5 folds (UNICEF)
 FOLDS10_MAX_ITEMS = 120   # ... and above this many questions (UNHCR)
 TABFM_REPO, TABFM_MAX_CLASSES = "google/tabfm-1.0.0-pytorch", 10
-TABFM_REV = "77cb9cc1b4fd3a9c77fbb9552c218200bb4dab83"   # v57: the snapshot every test used (Oct 9-16)
+TABFM_REV = "77cb9cc1b4fd3a9c77fbb9552c218200bb4dab83"   # the snapshot every test used (Oct 9-16)
 TABFM_ESTIMATORS = 1
-TABFM_SKIP = ("unhcr", "world_bank")   # U15: off on UNHCR (seconds to the 220M fine-tune); v98: off on World Bank (U21c +0.000009; pays for 600 network steps)
+TABFM_SKIP = ("unhcr", "world_bank")   # off on UNHCR (its seconds go to the 220M fine-tune) and on World Bank (+0.000009 there; pays for 600 network steps)
 SEED = 0
 SMOOTH = 0.5              # pseudo-count per option in the crowd marginal
 PAIR_MIN_COUNT = 30       # interaction levels rarer than this are dropped
 WEIGHT_PRIOR = 20.0       # pseudo-rows pulling question weights toward survey-wide weights (second blend stage)
 EM_ITERS = 300
-WPRIOR_GRID = [5.0, 20.0, 80.0, 320.0]   # H2: per-question shrinkage, chosen by cross-fitted likelihood
+WPRIOR_GRID = [5.0, 20.0, 80.0, 320.0]   # per-question shrinkage, chosen by cross-fitted likelihood
 LINEAR = [                # (features, λ): L2 on weights, loss is a per-row mean
     ("oh", 3e-4), ("oh", 1e-3), ("oh", 3e-3), ("oh", 1e-2),
     ("int", 3e-3), ("oh_ord", 1e-3),
@@ -80,35 +80,35 @@ MLP_GRID = [              # (hidden width, weight decay, dropout, features)
     (256, 1e-2, 0.3, "oh+hurdle"),   # M6: routed questions as P(asked) x P(answer | asked)
 ]
 MLP_SEEDS = 2
-MLP_GRID_BY = {"unhcr": [(512, 1e-2, 0.5, "oh", 4), (256, 1e-2, 0.3, "oh_ord", 4)]}   # U24g: with a fine-tuned teacher,
+MLP_GRID_BY = {"unhcr": [(512, 1e-2, 0.5, "oh", 4), (256, 1e-2, 0.3, "oh_ord", 4)]}   # with a fine-tuned teacher,
                                                                                      # the same 8 fits as 4 seeds each
 MLP_STEPS, MLP_LR, MLP_EVAL_EVERY = 400, 3e-3, 20
-MLP_STEPS_BY = {"world_bank": 600, "unhcr": 600}   # U22b (WB), U23a (UNHCR): their networks stopped at the 400-step cap
+MLP_STEPS_BY = {"world_bank": 600, "unhcr": 600}   # their networks stopped at the 400-step cap
 LBFGS_ITERS = 150
 TABICL_REPO, TABICL_CKPT = "jingang/TabICL", "tabicl-classifier-v2-20260212.ckpt"   # smoke test of strict builds only
 TABICL_ESTIMATORS = 1
 TABPFN_REPO = "Prior-Labs/tabpfn_3_5"
 TABPFN_FAST = "tabpfn-v3.5-fast-20260909.safetensors"
-TABPFN_FULL16 = "tabpfn-v3.5-20260909-fp16.safetensors"   # U2: the 220M default checkpoint, fp16 values (bundled)
+TABPFN_FULL16 = "tabpfn-v3.5-20260909-fp16.safetensors"   # the 220M default checkpoint, fp16 values (bundled)
 TABPFN_ESTIMATORS = {1: 1, 2: 3}                       # ensemble size per phase
-FT_FULL_FOR = ("world_bank", "unhcr")   # U2 (World Bank), U15 (UNHCR): the TabPFN member fine-tunes the default checkpoint
-FT_PLUS = {"unhcr": 479.0}   # U15: TabFM 628 s - slower 220M inference 149 s (H100), given to UNHCR's fine-tune
-FT_SHARE = 0.35           # H6: minimum share of a final call's time for fine-tuning
-FT_EPOCHS = int(os.environ.get("SIMBENCH_FT_EPOCHS", 10))     # H6: at most this many passes over the questions
+FT_FULL_FOR = ("world_bank", "unhcr")   # the TabPFN member fine-tunes the default checkpoint
+FT_PLUS = {"unhcr": 479.0}   # TabFM 628 s - slower 220M inference 149 s, given to UNHCR's fine-tune
+FT_SHARE = 0.35           # minimum share of a final call's time for fine-tuning
+FT_EPOCHS = int(os.environ.get("SIMBENCH_FT_EPOCHS", 10))     # at most this many passes over the questions
 FT_DEV = False            # rehearsal builds only (package.py --ft-dev): fine-tune in the development phase too
 FT_DEV_SKIP = ()          # rehearsal builds only (package.py --ft-dev-skip): surveys that still skip it in development
-FT_TASKS = 16             # H8g: questions per fine-tuning "epoch"
+FT_TASKS = 16             # questions per fine-tuning "epoch"
 FT_STATS = {}             # last fine-tuning: passes over the questions completed (diagnostics and ftdose)
 FT_MAX_CLASSES, FT_MIN_MINORITY = 10, 0.005   # tasks: at most this many answers; skip near-constant questions
-FT_MAX_CLASSES_BY = {"world_bank": 160, "unhcr": 160}   # U3, U24e: the 3.5 checkpoint's max_num_classes; wide questions join
-FT_MIN_MINORITY_BY = {"unhcr": 0.0}         # U24e: UNHCR fine-tunes on its near-constant questions too
+FT_MAX_CLASSES_BY = {"world_bank": 160, "unhcr": 160}   # the 3.5 checkpoint's max_num_classes; wide questions join
+FT_MIN_MINORITY_BY = {"unhcr": 0.0}         # UNHCR fine-tunes on its near-constant questions too
 FT_LR = 1e-5              # fine-tuning learning rate
-FT_NO_CKPT = ("world_bank",)   # U27 ckpt: no activation checkpointing in the fine-tune (same math, ~1.3x faster)
-TABPFN_ABS = ("world_bank",)  # U30 ABS: TabPFN member averages its estimators in logit space (0 s)
-TABPFN_SNAP = {"world_bank": (0.7, 0.25)}   # U35: (when, weight) of a snapshot of the same fine-tune as a 4th estimator
-SNAP_SECONDS = {"world_bank": 80.0}         # U35: H100 seconds of that estimator, taken from the fine-tune
-FT_SNAP = {}              # U35: the snapshot weights of the last fine-tune
-FT_LR_BY = {"world_bank": 3e-5}   # U23g (results/u23_wblr): World Bank, with its dose constant in FT_DOSE_BY
+FT_NO_CKPT = ("world_bank",)   # no activation checkpointing in the fine-tune (same math, ~1.3x faster)
+TABPFN_ABS = ("world_bank",)  # the TabPFN member averages its estimators in logit space (0 s)
+TABPFN_SNAP = {"world_bank": (0.7, 0.25)}   # (when, weight) of a snapshot of the same fine-tune as a 4th estimator
+SNAP_SECONDS = {"world_bank": 80.0}         # H100 seconds of that estimator, taken from the fine-tune
+FT_SNAP = {}              # the snapshot weights of the last fine-tune
+FT_LR_BY = {"world_bank": 3e-5}   # World Bank, with its dose constant in FT_DOSE_BY
 FAMILY_MIN = 3            # a family needs this many questions with the same options (and gate)
 FAMILY_CONTEXT = 20000    # rows of the long (person x question) table as TabPFN context
 FLOOR = 1e-3              # the grader's floor (starter-kit config.yml, scoring.floor), pre-compensated at the end
@@ -117,12 +117,12 @@ MAX_VIOLATION = 0.01      # ... and at most this share breaking it, to count as 
 TOTAL_SECONDS = {1: 780, 2: 3350}   # hard stop for the whole run (grader: 900 / 3600)
 N_CALLS = 3                         # predict() is called once per survey
 SAFETY_SECONDS = 25                 # reserved per call for blending and output
-POOL_RESERVE = 60                   # U32: the log pool runs unless the whole run is this close to TOTAL_SECONDS
-LOGPOOL_RIDGE = 80.0      # M10: pull of each question's pool weights toward the survey-wide ones
+POOL_RESERVE = 60                   # the log pool runs unless the whole run is this close to TOTAL_SECONDS
+LOGPOOL_RIDGE = 80.0      # pull of each question's pool weights toward the survey-wide ones
 LOGPOOL_ITERS = 100       # L-BFGS iterations per stage
-FT_DOSE_C = 0.01           # H47: optimism of the fine-tuned member per (pass x question / visible row)
-FT_DOSE_BY = {"world_bank": 0.03}    # T1 (results/t1_ftdose), U23g: World Bank's c at lr 3e-5
-FAMILY_SHRINK = ("unhcr",)  # U23e (results/u23_ens): stacking weights pulled question -> routing family -> survey
+FT_DOSE_C = 0.01           # optimism of the fine-tuned member per (pass x question / visible row)
+FT_DOSE_BY = {"world_bank": 0.03}    # World Bank's c at lr 3e-5
+FAMILY_SHRINK = ("unhcr",)  # stacking weights pulled question -> routing family -> survey
 FAMILY_PULL, FAMILY_RIDGE = 1.0, 320.0   # family weights' pull to the survey's (x visible rows); log-pool family ridge
 LOG_FLOOR = 1e-6          # member probabilities are clipped here before taking logs
 _CLOCK = {"start": time.time(), "calls": 0}
@@ -158,7 +158,7 @@ def assemble(frame, schema, probs):
 
     probs[item] is an (n_rows, K) array aligned with frame rows.
     """
-    items = [i for i in shipped_items(schema, frame) if schema["items"][i]["class"] == "PREDICT"]   # H56: scored cells only
+    items = [i for i in shipped_items(schema, frame) if schema["items"][i]["class"] == "PREDICT"]   # scored cells only
     blank = frame[items].isna().to_numpy()
     return [probs[items[col]][row].tolist() for row, col in zip(*np.nonzero(blank))]
 
@@ -184,7 +184,7 @@ def one_hot(columns, min_count=1):
 _NUM = re.compile(r"\d+(?:[.,]\d+)?")
 
 
-EDUCATION_ORDER = {     # H14c: education facts in their natural order (proxies afro Q94, arab Q1003 for the lab)
+EDUCATION_ORDER = {     # education facts in their natural order (also Afrobarometer Q94 and Arab Barometer Q1003, for the public surveys)
     'Q94': ['No formal schooling', 'Informal schooling only (including Koranic schooling)', 'Some primary schooling', 'Primary school completed', 'Intermediate school or Some secondary school / high school', 'Secondary school / high school completed', 'Post-secondary qualifications, other than university e.g. a diploma or degree from a polytechnic or college', 'Some university', 'University completed', 'Post-graduate'],
     'Q1003': ['No formal education', 'Elementary', 'Preparatory/Basic', 'Secondary', 'Technical degree', 'BA', 'MA and above'],
     's2_1c_education_level_lbl': ['1. No formal education', '2. Early Childhood Education or Pre-primary', '3. Primary', '4. Secondary', '5. Secondary - Technical and Vocational Education and Training (TVET)', '6. Post-secondary - Technical and Vocational Education and Training (TVET)', '7. Tertiary and above'],
@@ -236,8 +236,8 @@ class Design:
             values = list(schema["items"][name]["values"])
             chain = numeric_order(values)
             labels = [str(v) for v in values]
-            if (chain is None and name in EDUCATION_ORDER          # H14c: schema prior on education
-                    and all(v in labels for v in EDUCATION_ORDER[name])):          # v57: fail closed on a label change
+            if (chain is None and name in EDUCATION_ORDER          # schema prior on education
+                    and all(v in labels for v in EDUCATION_ORDER[name])):          # fail closed on a label change
                 chain = np.array([labels.index(v) for v in EDUCATION_ORDER[name]])
             pos = {v: i for i, v in enumerate(values)}
             col = np.array([pos.get(v, len(values)) for v in G[:, c]], float)
@@ -334,7 +334,7 @@ class LinearHeads(torch.nn.Module):
         return sum((w ** 2).sum() for w in self.W.values())
 
 
-# T5 / P-UNHCR (results/t5_profiles): UNHCR's networks and linear heads also see each high-cardinality GIVEN fact's
+# UNHCR's networks and linear heads also see each high-cardinality GIVEN fact's
 # level as its cross-fitted, shrunk answer-share profile (SVD components); rs44 arab_real +0.0001, afro / wgm lose.
 PROF_INSTRUMENTS = ("unhcr",)
 PROF_MIN_LEVELS = 15        # a GIVEN fact with at least this many schema levels gets answer profiles
@@ -412,12 +412,12 @@ def level_profiles(frame, schema, d):
     return t(fv_all), t(fh_all)
 
 
-# U5 (results/u5_distill): distil the fine-tuned TabPFN into the networks and linear heads. Fold model b also fits
+# distil the fine-tuned TabPFN into the networks and linear heads. Fold model b also fits
 # TabPFN's out-of-fold distributions on fold b's rows (context without fold b), the full model TabPFN's held-out
 # distributions on the held-out people's facts, with weight DISTILL_LAMBDA per row (the full model's rescaled to
 # the fold models' soft/hard mass ratio). No held-out labels; no fold sees a soft label made with its own fold.
 DISTILL_LAMBDA = 3.0
-DISTILL_LAMBDA_BY = {"world_bank": 10.0}   # U21d/e: WB students under the 220M fine-tuned teacher; UNHCR (U17), UNICEF (U21e) peak at 3
+DISTILL_LAMBDA_BY = {"world_bank": 10.0}   # WB students under the 220M fine-tuned teacher; UNHCR, UNICEF peak at 3
 
 
 def distill_targets(d, names, preds, buckets, lam):
@@ -524,7 +524,7 @@ class MLP(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
 
     def forward(self, X):
-        W1 = self.W1 * self.w1_mask if getattr(self, "w1_mask", None) is not None else self.W1   # H54: unseen levels
+        W1 = self.W1 * self.w1_mask if getattr(self, "w1_mask", None) is not None else self.W1   # unseen levels
         h = torch.nn.functional.gelu(torch.einsum("bnd,bdh->bnh" if X.dim() == 3 else "nd,bdh->bnh", X, W1) + self.b1)
         h = self.dropout(h)
         h = torch.nn.functional.gelu(h @ self.W2 + self.b2) + h
@@ -550,9 +550,9 @@ def fit_mlp_once(d, width, wd, dropout, features, seed, hurdle=False):
     X_vis, X_hid = prof_inputs(d, features)
     B = K_FOLDS + 1
     model = MLP(d, X_vis.shape[-1], width, dropout, B, seed, hurdle)
-    nz = (X_vis != 0).float()                                    # U4: count rows, not values (centred columns sum to ~0)
+    nz = (X_vis != 0).float()                                    # count rows, not values (centred columns sum to ~0)
     seen = torch.einsum("bn,bnd->bd", d.mask, nz) if nz.dim() == 3 else d.mask @ nz
-    model.w1_mask = (seen > 0).float().unsqueeze(-1)   # H54: a column no training row has keeps 0 weight, not its random init
+    model.w1_mask = (seen > 0).float().unsqueeze(-1)   # a column no training row has keeps 0 weight, not its random init
     opt = torch.optim.AdamW(model.parameters(), lr=MLP_LR, weight_decay=wd)
     holdout = 1.0 - d.mask[:K_FOLDS]                             # (K, N_vis)
 
@@ -765,7 +765,7 @@ class _TabFMAdapter:
 
 
 def tabfm_path():
-    """The pinned TabFM snapshot if the grader's cache holds it, else whatever main it fetched (v57)."""
+    """The pinned TabFM snapshot if the grader's cache holds it, else whatever main it fetched."""
     from huggingface_hub import snapshot_download
     try:
         return snapshot_download(TABFM_REPO, revision=TABFM_REV, local_files_only=True)
@@ -775,7 +775,7 @@ def tabfm_path():
 
 def fit_tabfm(d):
     """TabFM v1.0.0 (code Apache-2.0, weights TabFM Non-Commercial Licence; fetched by the grader
-    from models.txt, which the v34 probe proved works). Final phase only, at most 5 folds."""
+    from models.txt, which a development upload proved works). Final phase only, at most 5 folds."""
     from tabfm import tabfm_v1_0_0_pytorch as tabfm_v1
 
     model = tabfm_v1.load(model_type="classification", checkpoint_path=tabfm_path(), device=str(DEVICE))
@@ -795,7 +795,7 @@ def model_file(repo, name):
 
 
 def align_class_orders(on):
-    """H50c: TabPFN shuffles the class order per estimator config. The fine-tune trains under the configs of
+    """TabPFN shuffles the class order per estimator config. The fine-tune trains under the configs of
     n_estimators=2; at inference with n >= 3 estimators, configs 0 and 1 already share its column order and category
     codes but not its class order. With `on`, they take the fine-tune's class permutations (same seed and class
     count), so the fine-tuned weights predict under the views they were trained on; estimator 2 is unchanged.
@@ -823,7 +823,7 @@ def align_class_orders(on):
 
 def fit_tabpfn(d):
     """TabPFN-3.5 (non-commercial research licence, allowed by the rules), weights shipped in weights/.
-    Nominal facts are flagged as categorical. With d.ft_seconds > 0 it is first fine-tuned on the survey (H6)."""
+    Nominal facts are flagged as categorical. With d.ft_seconds > 0 it is first fine-tuned on the survey."""
     import tabpfn.checkpoint
     from tabpfn import TabPFNClassifier
 
@@ -831,9 +831,9 @@ def fit_tabpfn(d):
     tabpfn.checkpoint.Checkpoint.is_safetensors = property(lambda self: True)
     os.environ.setdefault("TABPFN_MODEL_CACHE_SIZE", "1")      # build the network once
     # The fast checkpoint by default; World Bank and UNHCR fine-tune the 220M default one (fp16) when there is
-    # time to fine-tune (U2, U15). Without fine-tuning the default checkpoint is too slow for its gain.
+    # time to fine-tune. Without fine-tuning the default checkpoint is too slow for its gain.
     ckpt = model_file(TABPFN_REPO, TABPFN_FAST)
-    if getattr(d, "ft_full", False) and getattr(d, "ft_seconds", 0) > 0:   # U2: fine-tune the default checkpoint
+    if getattr(d, "ft_full", False) and getattr(d, "ft_seconds", 0) > 0:   # fine-tune the default checkpoint
         try:
             full = model_file(TABPFN_REPO, TABPFN_FULL16)
             if not os.path.exists(full):          # a missing file would make TabPFN try a gated download
@@ -861,13 +861,13 @@ def fit_tabpfn(d):
     try:
         if state is not None:
             install_tabpfn_weights(ckpt, state)
-            align_class_orders(True)                # H50c
+            align_class_orders(True)
             d.finetuned = True
         out = fit_incontext(d, clf)
         snap = FT_SNAP.pop("state", None)
         if state is not None and snap is not None and getattr(d, "snap", None) \
                 and time.time() + SNAP_SECONDS.get(getattr(d, "inst", None), 80.0) < d.deadline:
-            try:                                                    # U35: snapshot of the same fine-tune, 1 estimator
+            try:                                                    # snapshot of the same fine-tune, 1 estimator
                 one = TabPFNClassifier(model_path=ckpt, device=str(DEVICE), n_estimators=1,
                                        categorical_features_indices=d.nominal_cols or None, random_state=SEED,
                                        average_before_softmax=d.tabpfn_abs)
@@ -883,7 +883,7 @@ def fit_tabpfn(d):
                     if DEBUG:
                         print(f"    tabpfn snapshot: fired, weights after loop {FT_SNAP.get('loop')}, mixed at {w}, "
                               f"{FT_STATS['snap_seconds']}s")
-                elif DEBUG:                                # overran: some questions may hold crowd shares; v105's member
+                elif DEBUG:                                # overran: some questions may hold crowd shares, so keep the member without it
                     print(f"    tabpfn snapshot: discarded (overran), {FT_STATS['snap_seconds']}s")
             except Exception:
                 if DEBUG or _CLOCK.get("strict"):
@@ -892,7 +892,7 @@ def fit_tabpfn(d):
             print(f"    tabpfn snapshot: skipped ({'no snapshot taken' if snap is None else 'no time left'})")
         return out
     finally:                                   # the family member and the next survey start from the original
-        FT_SNAP.clear()                        # U35: the snapshot weights never outlive this member
+        FT_SNAP.clear()                        # the snapshot weights never outlive this member
         align_class_orders(False)
         if state is not None:
             from tabpfn.model_loading import clear_built_model_cache
@@ -901,7 +901,7 @@ def fit_tabpfn(d):
 
 def finetune_tabpfn(X, Y, nominal, ckpt, seconds, epochs, max_classes=FT_MAX_CLASSES, min_minority=FT_MIN_MINORITY,
                     lr=FT_LR, act_ckpt=True, snap_frac=None):
-    """H6: TabPFN fine-tuned on this survey's visible people, every question one task, in memory. Returns the
+    """TabPFN fine-tuned on this survey's visible people, every question one task, in memory. Returns the
     new state dict, or None when no question qualifies. Tasks: 2..max_classes answers present and no answer
     above 1 - min_minority. TabPFN's loop takes a list of datasets and preprocesses each one on its own;
     it is handed this survey's questions instead of the single dataset it asks for, and the class count
@@ -932,7 +932,7 @@ def finetune_tabpfn(X, Y, nominal, ckpt, seconds, epochs, max_classes=FT_MAX_CLA
             self.finetuned_estimator_.n_classes_ = n
             self.finetuned_estimator_.classes_ = torch.arange(n)
 
-    step = min(FT_TASKS, len(ys))                        # H8g: questions per loop epoch, cycling through all
+    step = min(FT_TASKS, len(ys))                        # questions per loop epoch, cycling through all
     order = np.random.default_rng(SEED).permutation(len(ys))
     calls = [0]
 
@@ -954,7 +954,7 @@ def finetune_tabpfn(X, Y, nominal, ckpt, seconds, epochs, max_classes=FT_MAX_CLA
     def every_task(calling_instance, X_raw, y_raw, *a, **k):   # called once per loop epoch
         now = time.time()
         done = len(loop_start)                           # loops finished before this one (the first includes the build)
-        if snap_frac and "state" not in FT_SNAP and done >= 2:   # U35: the weights at snap_frac of the expected loops
+        if snap_frac and "state" not in FT_SNAP and done >= 2:   # the weights at snap_frac of the expected loops
             per = (now - loop_start[1]) / (done - 1)
             expected = min(cap_loops, done + max(0.0, seconds - (now - started)) / per)
             if done >= snap_frac * expected:
@@ -986,7 +986,7 @@ def finetune_tabpfn(X, Y, nominal, ckpt, seconds, epochs, max_classes=FT_MAX_CLA
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
-    if oom:                                              # U27 ckpt: retry with checkpointing for the time left
+    if oom:                                              # retry with checkpointing for the time left
         FT_STATS["oom_retry"] = True
         return finetune_tabpfn(X, Y, nominal, ckpt, seconds - (time.time() - started), epochs, max_classes,
                                min_minority, lr, act_ckpt=True, snap_frac=snap_frac)
@@ -1052,7 +1052,7 @@ def fit_tabpfn_family(d, schema):
         Y = d.Y[:, js]                                           # (N_vis, J_fam)
         for f in range(K_FOLDS + 1):
             if time.time() > d.deadline:
-                # A2: an interrupted family keeps crowd shares on its fold rows too, so its out-of-fold quality
+                # An interrupted family keeps crowd shares on its fold rows too, so its out-of-fold quality
                 # matches its held-out predictions
                 cols = [pos[k][j] for j in js]
                 p_vis[k][:, cols], p_hid[k][:, cols] = crowd_vis[k][:, cols], crowd_hid[k][:, cols]
@@ -1110,7 +1110,7 @@ def linear_mixture(P, strength):
 
 
 def crossfit_mixture(d, P, strength):
-    """H2: (J, N_vis) mixture probability of the true answer, each row from weights fitted without its fold."""
+    """(J, N_vis) mixture probability of the true answer, each row from weights fitted without its fold."""
     out = np.empty(P.shape[:2])
     for f in range(K_FOLDS):
         te = d.folds == f
@@ -1120,7 +1120,7 @@ def crossfit_mixture(d, P, strength):
 
 
 def routing_families(schema, d):
-    """U23e: family id per question: a gate parent and every question it gates (transitively) share an id;
+    """Family id per question: a gate parent and every question it gates (transitively) share an id;
     questions outside any family (or in a one-question family) share id 0."""
     items = schema["items"]
 
@@ -1140,7 +1140,7 @@ def routing_families(schema, d):
 
 
 def family_mixture(P, fam, strength, n_vis):
-    """U23e: survey EM weights -> family weights (pulled to the survey's by FAMILY_PULL x visible rows) -> question
+    """Survey EM weights -> family weights (pulled to the survey's by FAMILY_PULL x visible rows) -> question
     weights (pulled to their family's by `strength` pseudo-rows). P (J, N, M). Returns (J, M)."""
     J, N, M = P.shape
     w_s = em_weights(P.reshape(1, -1, M))[0]
@@ -1152,7 +1152,7 @@ def family_mixture(P, fam, strength, n_vis):
 
 
 def fit_log_pool(d, oof_buckets, hid_buckets, w_init):
-    """M10: geometric pool p(a) ∝ exp(Σ_m w_m log p_m(a)), weights unconstrained.
+    """Geometric pool p(a) ∝ exp(Σ_m w_m log p_m(a)), weights unconstrained.
 
     oof_buckets / hid_buckets: per member, {k: (N, J_k, k) probabilities} (own-fold OOF for
     visible rows, full-data model for held-out rows). Weights are fitted first survey-wide,
@@ -1193,7 +1193,7 @@ def fit_log_pool(d, oof_buckets, hid_buckets, w_init):
     if d.family is None:
         run(list(W.values()), lambda: nll(lambda k: W[k])
             + LOGPOOL_RIDGE * sum(((W[k] - g[:, None, :]) ** 2).sum() for k in d.buckets))
-    else:                                                        # U23e: question -> family -> survey ridges
+    else:                                                        # question -> family -> survey ridges
         fid = torch.as_tensor(d.family, device=DEVICE)
         G = g[:, None, :].expand(B, int(d.family.max()) + 1, M).clone().requires_grad_()
         run(list(W.values()) + [G], lambda: nll(lambda k: W[k])
@@ -1215,7 +1215,7 @@ def fit_log_pool(d, oof_buckets, hid_buckets, w_init):
     return oof, hid, g[-1].cpu().numpy()
 
 
-# Measured member seconds per instrument (INSTRUMENT_COST: v51's members on the H100, fine-tuning excluded).
+# Measured member seconds per instrument (INSTRUMENT_COST: the members on the H100, fine-tuning excluded).
 # The grader's call order is unknown, so each call gets a share of the remaining time proportional to its own
 # cost against the instruments still to come, instead of an equal third: UNHCR, the slowest, cannot be
 # squeezed if it comes first.
@@ -1224,10 +1224,10 @@ INSTRUMENT_ITEMS = {"s2_1c_education_level_lbl": "unhcr", "user.educationLevel":
 
 
 def instrument(schema):
-    """The instrument by its row count, else by a characteristic item (U4: in case a schema is re-issued)."""
+    """The instrument by its row count, else by a characteristic item (in case a schema is re-issued)."""
     name = INSTRUMENT_ROWS.get(schema.get("dataset", {}).get("n_rows"))
     return name or next((v for k, v in INSTRUMENT_ITEMS.items() if k in schema.get("items", {})), None)
-# v51 members on the H100, fine-tuning excluded; UNHCR + 28 s for 600 network steps (U23a), + 5 s family shrinkage (U23e)
+# members on the H100, fine-tuning excluded; UNHCR + 28 s for 600 network steps, + 5 s family shrinkage
 INSTRUMENT_COST = {1: {"unhcr": 303, "unicef": 185, "world_bank": 163},
                    2: {"unhcr": 1153 + 28 + 5, "unicef": 174, "world_bank": 342}}
 
@@ -1249,7 +1249,7 @@ def time_share(schema, phase, left):
     return max(proportional, min(left / calls_left, left - 1.15 * rest))
 
 
-# U1 (results/u1_kit): failed final submissions do not count and may be retried (starter-kit README:113-116), so in the
+# failed final submissions do not count and may be retried (starter-kit README:113-116), so in the
 # final phase a run that would finish degraded fails instead, with a distinct exception type (the only diagnostic the
 # hidden run reports); the retry is the lenient v99_lenient.
 LOUD_FINAL = True
@@ -1285,9 +1285,9 @@ def _predict(frame, schema):
     d.deadline = started + max(30.0, time_share(schema, phase, left) - SAFETY_SECONDS)
     share = d.deadline - started
     member_cost = INSTRUMENT_COST[phase].get(inst)
-    ft_room = share - 1.15 * member_cost if member_cost else 0.0            # what the members leave (v52)
+    ft_room = share - 1.15 * member_cost if member_cost else 0.0            # what the members leave
     dev_ft = FT_DEV and inst not in FT_DEV_SKIP
-    d.ft_seconds = max(FT_SHARE * share, ft_room) if d.phase2 or dev_ft else 0.0   # H6: final phase
+    d.ft_seconds = max(FT_SHARE * share, ft_room) if d.phase2 or dev_ft else 0.0   # final phase
     J, n_hid = len(d.targets), len(d.hid_idx)
     names, oofs, preds = [], [], []
 
@@ -1312,15 +1312,15 @@ def _predict(frame, schema):
         bucket[k] = b
     buckets.append(bucket)
 
-    d.ft_full = inst in FT_FULL_FOR                                        # U2
-    if d.ft_seconds > 0 and d.ft_full:                                     # U15
+    d.ft_full = inst in FT_FULL_FOR
+    if d.ft_seconds > 0 and d.ft_full:
         d.ft_seconds += FT_PLUS.get(inst, 0.0)
     d.ft_max_classes = int(FT_MAX_CLASSES_BY.get(inst, FT_MAX_CLASSES))
     d.ft_min_minority = FT_MIN_MINORITY_BY.get(inst, FT_MIN_MINORITY)
     d.ft_lr = FT_LR_BY.get(inst, FT_LR)
     d.ft_act_ckpt = inst not in FT_NO_CKPT
     d.tabpfn_abs = inst in TABPFN_ABS
-    d.snap = TABPFN_SNAP.get(inst) if d.phase2 else None                  # U35
+    d.snap = TABPFN_SNAP.get(inst) if d.phase2 else None
     d.inst = inst
     if d.snap and d.ft_seconds > 0:
         d.ft_seconds = max(1.0, d.ft_seconds - SNAP_SECONDS.get(inst, 0.0))
@@ -1334,7 +1334,7 @@ def _predict(frame, schema):
             if DEBUG or (STRICT_DEFAULT and not d.phase2):
                 raise
     # Most valuable first, so the time guard drops the cheapest members. TabPFN comes first because the
-    # networks and linear heads distil from it; a generator, so the network grid can follow its fine-tune (U24g).
+    # networks and linear heads distil from it; a generator, so the network grid can follow its fine-tune.
     def member_jobs():
         yield "tabpfn", fit_tabpfn, (d,)
         grid = (MLP_GRID_BY.get(inst) if getattr(d, "finetuned", False) else None) \
@@ -1342,7 +1342,7 @@ def _predict(frame, schema):
         yield from ((f"mlp_{f}_{w}_{p:g}", fit_mlp, (d, w, wd, p, f, n))
                     for w, wd, p, f, n in grid if f.split("+")[0] in d.X
                     and not (f.endswith("+hurdle") and not d.gated.any()))
-        if d.phase2 and inst not in TABFM_SKIP:                  # U15
+        if d.phase2 and inst not in TABFM_SKIP:
             yield "tabfm", fit_tabfm, (d,)
         yield from ((f"linear_{f}_{lam:g}", fit_linear, (d, f, lam)) for f, lam in LINEAR if f in d.X)
         yield from ((f"latent_{C}", fit_latent, (d, C)) for C in LATENT_CLASSES)
@@ -1369,7 +1369,7 @@ def _predict(frame, schema):
             oof, pred, bucket = np.empty((len(d.vis_idx), J)), [None] * J, {}
             collect(logits_vis, logits_hid, d, oof, pred, bucket)
             del logits_vis, logits_hid
-            # A2: one non-finite cell would make every question's blend weights NaN; such a member is dropped
+            # One non-finite cell would make every question's blend weights NaN; such a member is dropped
             if not (np.isfinite(oof).all() and all(p is None or np.isfinite(p).all() for p in pred)
                     and all(torch.isfinite(t).all().item() for t in bucket.values())):
                 raise FloatingPointError(f"{name}: non-finite predictions")
@@ -1387,7 +1387,7 @@ def _predict(frame, schema):
             raise FinalNoFinetune()
 
     P = np.stack(oofs, -1).transpose(1, 0, 2) + 1e-6             # (J, N_vis, M)
-    # H47: the fine-tuned TabPFN's weights saw every visible row, so its out-of-fold likelihood is optimistic
+    # the fine-tuned TabPFN's weights saw every visible row, so its out-of-fold likelihood is optimistic
     # by about FT_DOSE_C x passes x fine-tuning questions / visible rows nats per cell (measured on 4 splits x
     # 4 proxies). Every fitting stage reads its true-class OOF probability discounted by that much.
     ft_delta = (FT_DOSE_BY.get(inst, FT_DOSE_C) * FT_STATS.get("passes", 0) * FT_STATS.get("questions", 0) / len(d.vis_idx)
@@ -1402,18 +1402,18 @@ def _predict(frame, schema):
                     y = d.Y_t[:, idx].unsqueeze(-1)
                     t.scatter_(-1, y, t.gather(-1, y) * float(np.exp(-ft_delta)))
                     buckets[m][k] = t
-    xfit = {s: crossfit_mixture(d, P, s) for s in WPRIOR_GRID}   # H2: shrinkage by cross-fitted likelihood
+    xfit = {s: crossfit_mixture(d, P, s) for s in WPRIOR_GRID}   # shrinkage by cross-fitted likelihood
     strength = max(WPRIOR_GRID, key=lambda s: np.log(xfit[s]).sum())
     w_global, W = linear_mixture(P, strength)
-    mixed_oof = xfit[strength]                                    # (J, N_vis), cross-fitted (H2)
+    mixed_oof = xfit[strength]                                    # (J, N_vis), cross-fitted
     d.family = None
     if inst in FAMILY_SHRINK:
-        fam = routing_families(schema, d)                          # U23e: shrink through routing families
+        fam = routing_families(schema, d)                          # shrink through routing families
         if fam.max() > 0:
             d.family = fam
             W = family_mixture(P, fam, strength, len(d.vis_idx))
             mixed_oof = np.empty(P.shape[:2])
-            for f in range(K_FOLDS):                               # cross-fitted OOF mixture, as H2's
+            for f in range(K_FOLDS):                               # cross-fitted OOF mixture
                 te = d.folds == f
                 Wf = family_mixture(P[:, ~te], fam, strength, len(d.vis_idx))
                 mixed_oof[:, te] = (P[:, te] * Wf[:, None, :]).sum(-1)
@@ -1433,7 +1433,7 @@ def _predict(frame, schema):
         full[d.hid_idx] = sum(wm * p[j] for wm, p in zip(w, preds))
         probs[item] = full
 
-    # M10: geometric pool, then a per-question EM between the linear mixture and the pool. U32: it also runs past this
+    # Geometric pool, then a per-question EM between the linear mixture and the pool. It also runs past this
     # call's deadline (members and the fine-tune may overrun the share on a slower GPU) while the run's clock allows
     pool_until = max(d.deadline + SAFETY_SECONDS / 2, _CLOCK["start"] + TOTAL_SECONDS[phase] - POOL_RESERVE)
     if len(buckets) == len(preds) and time.time() < pool_until:
@@ -1441,7 +1441,7 @@ def _predict(frame, schema):
             t = time.time()
             pool_oof, pool_hid, g = fit_log_pool(d, buckets, preds, w_global)
             if not (np.isfinite(pool_oof).all() and all(np.isfinite(h).all() for h in pool_hid.values())):
-                raise FloatingPointError("log pool: non-finite")   # U24a: keep the linear mixture
+                raise FloatingPointError("log pool: non-finite")   # keep the linear mixture
             P2 = np.stack([mixed_oof, pool_oof.T], -1) + 1e-6     # (J, N_vis, 2)
             v_global = em_weights(P2.reshape(1, -1, 2))[0]
             V = em_weights(P2, v_global, WEIGHT_PRIOR)
@@ -1490,7 +1490,7 @@ def apply_verified_routing(frame, schema, d, probs):
             continue
         k = d.k[j]
         routed_in = frame[gate["parent"]].isin(gate["observed_if"]).to_numpy()
-        known = frame[gate["parent"]].notna().to_numpy()      # U4: a NaN parent is neither routed in nor out
+        known = frame[gate["parent"]].notna().to_numpy()      # a NaN parent is neither routed in nor out
         not_asked = d.Y[:, j] == k - 1                        # visible rows, sentinel is last
         vis_in, hid_in = routed_in[d.vis_idx], routed_in[d.hid_idx]
         vis_k, hid_k = known[d.vis_idx], known[d.hid_idx]
@@ -1513,7 +1513,7 @@ def apply_verified_routing(frame, schema, d, probs):
 
 
 def smoke_finetune(d, rows=300):
-    """Strict development uploads, once, at the end of the last call (H6): fine-tune TabPFN on a few rows
+    """Strict development uploads, once, at the end of the last call: fine-tune TabPFN on a few rows
     and questions, swap the weights in, fit on them and restore the original, so a broken fine-tuning path
     fails the development upload rather than silently falling back in the final."""
     import tabpfn.checkpoint
@@ -1573,7 +1573,7 @@ def _marginal_fallback(frame, schema):
     """Last line of defence: the smoothed crowd marginal, which cannot fail."""
     probs = {}
     targets = [i for i, r in schema["items"].items() if r["class"] == "PREDICT" and i in frame.columns]
-    visible = frame[targets].notna().all(axis=1).to_numpy()   # v57: PREDICT columns only, as in Design
+    visible = frame[targets].notna().all(axis=1).to_numpy()   # PREDICT columns only, as in Design
     for item in shipped_items(schema, frame):
         options = item_options(schema, item)
         counts = frame.loc[visible, item].value_counts()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Check every file of a submission zip against SHA256SUMS (the files of the zip that was scored).
+"""Check every file of a submission zip against SHA256SUMS.
 
     python scripts/verify_zip.py dist/submission.zip
 """

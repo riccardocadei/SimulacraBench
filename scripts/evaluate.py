@@ -24,7 +24,6 @@ not how it will do on the leaderboard.
 import argparse
 import importlib.util
 import json
-import os
 import sys
 import time
 from pathlib import Path
@@ -64,7 +63,7 @@ def staged_frame(schema, masked):
 
 
 def save_predictions(path, schema, vectors, truth, cells, uniform, reference):
-    """Per-cell scored distributions, for paired comparisons and calibration (scripts/analyze.py)."""
+    """Per-cell scored distributions, for paired comparisons and calibration."""
     path.parent.mkdir(parents=True, exist_ok=True)
     options = {item: make_sandbox.options_for(schema, item) for item in {c[2] for c in cells}}
     np.savez_compressed(
@@ -114,14 +113,6 @@ def evaluate(module, data_dir, phase, config, train_frac=1.0, save=None, sequent
         save_predictions(save, schema, scored, truth, cells, uniform, reference)
     _, crowd = kit.baselines(schema, truth, cells, floor)
     diag = getattr(module, "LAST_DIAGNOSTICS", {})
-    if save is not None and "lab" in diag:     # every member's output (SIMBENCH_LAB), for analyze.py blend
-        lab = diag.pop("lab")
-        hidden = respondents[respondents[kit.ROLE_COLUMN] == kit.PHASE_ROLES[phase]["hidden"]]
-        lab["Y_hid"] = np.column_stack([
-            hidden[item].map({o: i for i, o in enumerate(make_sandbox.options_for(schema, item))}).to_numpy()
-            for item in lab["targets"]])
-        lab["uniform"], lab["reference"] = uniform, reference
-        np.savez_compressed(save.with_name(save.stem + "_lab.npz"), **lab)
     return {"skill": result["skill"], "se": result["std_error"] / reference, "reference": reference,
             # submissions report their in-run skill against the uniform guess: same loss, put on R
             "cv_skill": 1.0 - (1.0 - diag.get("cv_skill", float("nan"))) * uniform / reference,
@@ -145,15 +136,6 @@ def main():
     parser.add_argument("--sequential", action="store_true",
                         help="one clock for all datasets, as on the grader (three calls in one run); "
                              "default: every dataset simulates the first call")
-    parser.add_argument("--lab", action="store_true",
-                        help="with --save: also store every member's out-of-fold and held-out output "
-                             "(results/<name>/<dataset>_lab.npz) for `analyze.py blend`")
-    parser.add_argument("--cache", metavar="DIR",
-                        help="experiments (v46+): save every fitted member to DIR/<dataset>.pt, or reuse it if present, "
-                             "so the submission's own combiner can be re-run on member subsets (SIMBENCH_DROP) or variants")
-    parser.add_argument("--cache-out", metavar="DIR",
-                        help="experiments (v47+, with SIMBENCH_AUGMENT=1): save the cached members plus the newly "
-                             "fitted SIMBENCH_EXTRA ones to DIR/<dataset>.pt")
     parser.add_argument("--by-item", metavar="NAME",
                         help="also print the per-item log score for this dataset")
     args = parser.parse_args()
@@ -163,8 +145,6 @@ def main():
     if missing:
         sys.exit(f"no dataset at {missing[0]} (sandboxes: run scripts/make_sandboxes.sh)")
     config = make_sandbox.load_config(str(KIT / "config.yml"))
-    if args.lab:
-        os.environ["SIMBENCH_LAB"] = "1"
     import_started = time.time()
     module = load_submission(args.submission)
     import_seconds = time.time() - import_started
@@ -175,12 +155,6 @@ def main():
         instrument = data_dir.name
         name = args.name or Path(args.submission).name
         save = (ROOT / "results" / name / f"{instrument}.npz") if args.save else None
-        if args.cache:
-            Path(args.cache).mkdir(parents=True, exist_ok=True)
-            os.environ["SIMBENCH_CACHE_FILE"] = str(Path(args.cache) / f"{instrument}.pt")
-        if args.cache_out:
-            Path(args.cache_out).mkdir(parents=True, exist_ok=True)
-            os.environ["SIMBENCH_CACHE_OUT"] = str(Path(args.cache_out) / f"{instrument}.pt")
         r = evaluate(module, data_dir, args.phase, config, args.train_frac, save, args.sequential,
                      args.vis_frac)
         skills.append(r["skill"])

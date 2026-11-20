@@ -21,10 +21,10 @@ compensation of the grader's probability floor. A time planner keeps the run ins
 
 | Path | Content |
 |---|---|
-| `submission/main.py` | The scored submission, unmodified (single file; its docstring describes every step) |
+| `submission/main.py` | The scored submission (single file; its docstring describes every step) |
 | `submission/requirements.txt`, `models.txt` | Pinned packages and the model the grader prefetches (TabFM) |
 | `submission/NOTICE`, `submission/weights/LICENSE-*` | Licences of the shipped weights |
-| `SHA256SUMS` | sha256 of every file in the uploaded zip |
+| `SHA256SUMS` | sha256 of every file of the submission zip |
 | `scripts/setup.sh` | Clones the organizers' starter kit at the pinned commit and writes practice data |
 | `scripts/fetch_weights.sh` | Downloads the pretrained weights and checks them (uses `make_fp16.py`, `weights_hash.py`) |
 | `scripts/package.py`, `verify_zip.py` | Build and validate the submission zip; check its files against `SHA256SUMS` |
@@ -43,7 +43,7 @@ bash scripts/setup.sh                              # 1. starter kit (pinned) + p
 HF_TOKEN=... bash scripts/fetch_weights.sh         # 2. weights into submission/weights/, sha256 checked
 python scripts/package.py submission               # 3. dist/submission.zip, validated by the starter kit
 
-python scripts/verify_zip.py dist/submission.zip   # 4. every file equals the scored zip (SHA256SUMS)
+python scripts/verify_zip.py dist/submission.zip   # 4. every file has the expected sha256 (SHA256SUMS)
 ```
 
 Notes:
@@ -86,12 +86,9 @@ splits used in the report.
 
 ## About `submission/main.py`
 
-The file is byte-identical to the one that was scored, so it was not edited for release. Two things follow:
-
-- Its first line still says "v102", the version in which the docstring was last rewritten; the scored build is
-  internally called v106.
-- Comments carry short tags such as `H47` or `U35`. They are the ids of the experiments that justified a setting;
-  the report's appendix describes each adopted and each rejected change.
+The file holds the code that was scored. After the upload only its comments and docstrings were tidied; the code
+is unchanged (the two files have the same syntax tree). Commit `bc66332` of this repository holds the file exactly
+as uploaded (sha256 `ed1d4e63b90a6109…`); the other eight files of the zip are the same in both.
 
 ## Licence
 
