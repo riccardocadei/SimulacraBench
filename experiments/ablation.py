@@ -9,14 +9,18 @@ memory. Each arm then repeats the run with one part removed:
 
   tabpfn_member  the fine-tuned TabPFN gets no weight in either pool (its students stay)
   networks       the multi-task networks get no weight in either pool
+  regressions    the multinomial regressions get no weight in either pool
+  latent_classes the latent-class model gets no weight in either pool
+  second_model   the pooled-question TabPFN or TabFM gets no weight in either pool
+  crowd_marginal the crowd marginal gets no weight in either pool
   geometric_pool the geometric pool is skipped; the linear pool stands alone
   optimism       no optimism correction of the fine-tuned member when the pool weights are fitted
   floor          no compensation of the grader's probability floor
   distillation   the students are refitted without the fine-tuned TabPFN as teacher
   finetuning     TabPFN is used with its published weights; every member is refitted
 
-The first five arms reuse the stored members, so their difference from the full run is exact. The last two refit
-members, and two fits differ slightly from run to run (GPU kernels are not deterministic). The run-time budget is
+All arms but the last two reuse the stored members, so their difference from the full run is exact. The last two
+refit members, and two fits differ slightly from run to run (GPU kernels are not deterministic). The run-time budget is
 lifted, so fine-tuning stops at its cap of passes. Needs a GPU.
 """
 import argparse
@@ -31,7 +35,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import evaluate as ev  # noqa: E402
 
-ARMS = ("tabpfn_member", "networks", "geometric_pool", "optimism", "floor", "distillation", "finetuning")
+ARMS = ("tabpfn_member", "networks", "regressions", "latent_classes", "second_model", "crowd_marginal",
+        "geometric_pool", "optimism", "floor", "distillation", "finetuning")
+DROPS = {"tabpfn_member": ("tabpfn",), "networks": ("networks",), "regressions": ("regressions",),
+         "latent_classes": ("latent",), "second_model": ("pooled_tabpfn", "tabfm"), "crowd_marginal": ("marginal",)}
 MEMBER_FITS = {"fit_tabpfn": "tabpfn", "fit_mlp": "networks", "fit_tabfm": "tabfm", "fit_linear": "regressions",
                "fit_latent": "latent", "fit_tabpfn_family": "pooled_tabpfn"}
 STUDENTS = ("networks", "regressions")
@@ -118,10 +125,8 @@ class Pipeline:
         for name in SETTINGS:
             setattr(M, name, self.original[name])
         self.order, self.dropped, self.refit, self.plain_tabpfn, self.no_pool = [], (), (), False, False
-        if arm == "tabpfn_member":
-            self.dropped = ("tabpfn",)
-        elif arm == "networks":
-            self.dropped = ("networks",)
+        if arm in DROPS:
+            self.dropped = DROPS[arm]
         elif arm == "geometric_pool":
             self.no_pool = True
         elif arm == "optimism":
@@ -158,8 +163,8 @@ def main():
                 sys.exit("full: TabPFN was not fine-tuned")
         if len(weights) != 1 + len(pipeline.order):
             sys.exit(f"{arm}: {len(weights)} members in the pool, {1 + len(pipeline.order)} fitted (a member failed)")
-        if arm == "geometric_pool" and "pool_share" in diagnostics:
-            sys.exit("geometric_pool: the pool still ran")
+        if (arm == "geometric_pool") == ("pool_share" in diagnostics):
+            sys.exit(f"{arm}: the geometric pool {'still ran' if arm == 'geometric_pool' else 'did not run'}")
         records.append(dict(arm=arm, survey=args.survey, data=args.data.name, skill=result["skill"],
                             lost_1e4=round((full - result["skill"]) * 1e4, 2), finetuned=bool(diagnostics.get("finetuned")),
                             seconds=round(time.time() - started)))

@@ -62,21 +62,26 @@ python experiments/ablation.py world_bank bench/rs41_afrowb76
 ```
 
 The pipeline is fitted once and every member's output is kept in memory; each arm then repeats the run with one
-part removed (see the script's docstring). Five arms reuse the stored members, so their difference from the full
-run is exact; `distillation` and `finetuning` refit members. The UNICEF stand-in takes about 8 minutes on an H100;
+part removed (see the script's docstring). Nine arms reuse the stored members, so their difference from the full
+run is exact; `distillation` and `finetuning` refit members. The UNICEF stand-in takes about 10 minutes on an H100;
 the other two were not rerun with this script.
 
-Check, UNICEF stand-in, split 41, on an H100, skill lost in units of 10⁻⁴:
+Check, UNICEF stand-in, split 41, on an H100, skill lost in units of 10⁻⁴ (negative: the part costs skill on this
+split):
 
-| Arm | This script, one split | Report, mean of several splits |
+| Arm | This script, one split | Report's Table 2, mean of several splits |
 |---|---|---|
-| `tabpfn_member` | 1.6 | 1.4 |
+| `tabpfn_member` | 1.4 | 1.4 |
 | `networks` | 3.6 | 3.1 |
-| `geometric_pool` | 1.4 | 2.0 |
-| `optimism` | 0.1 | 0.0 |
+| `regressions` | 0.7 | appendix |
+| `latent_classes` | −0.9 | appendix |
+| `second_model` | 1.4 | appendix |
+| `crowd_marginal` | 0.0 | appendix |
+| `geometric_pool` | 1.3 | 2.0 |
+| `optimism` | 0.0 | 0.0 |
 | `floor` | 2.4 | 1.5 |
 | `distillation` | 1.0 | 1.0 |
-| `finetuning` | 1.9 | 1.6 |
+| `finetuning` | 1.8 | 1.6 |
 
 The report's table also has a row for the World Bank weight snapshot. It is not an arm here, because removing it
 needs a second fine-tuning run, and two fine-tuning runs differ by an amount comparable to the effect.
