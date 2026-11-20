@@ -29,7 +29,7 @@ compensation of the grader's probability floor. A time planner keeps the run ins
 | `scripts/fetch_weights.sh` | Downloads the pretrained weights and checks them (uses `make_fp16.py`, `weights_hash.py`) |
 | `scripts/package.py`, `verify_zip.py` | Build and validate the submission zip; check its files against `SHA256SUMS` |
 | `scripts/evaluate.py` | Scores a submission locally with the starter kit's own scorer |
-| `scripts/build_bench.py`, `resplit.py`, `make_afrowb76.py` | Convert public surveys into the competition format (method selection only) |
+| `scripts/build_bench.py`, `resplit.py`, `make_afrowb76.py`, `make_arab_*.py` | Convert public surveys into the competition format (method selection only) |
 | `experiments/` | Scripts that reproduce the report's evidence with the scored code (see its README) |
 | `environment.lock.txt` | The Python 3.13 environment used for development and timing |
 

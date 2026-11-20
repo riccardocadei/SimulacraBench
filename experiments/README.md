@@ -27,6 +27,13 @@ python scripts/resplit.py bench/afrobarometer bench/rs41_afrobarometer --seed 41
 python scripts/make_afrowb76.py bench/rs41_afrobarometer bench/rs41_afrowb76 1041   # World Bank's shape: 76 questions
 ```
 
+Two variants of the Arab Barometer stand-in serve as checks in the report's appendix:
+
+```bash
+python scripts/make_arab_lowloss.py bench/rs41_arab_barometer_real bench/rs41_arab_lowloss        # near-constant answers
+python scripts/make_arab_skipheavy.py bench/arab_barometer_real bench/rs41_arab_barometer_real bench/rs41_arab_skipheavy
+```
+
 ## Fig. 1b: from the crowd marginal to the full pipeline
 
 ```bash
