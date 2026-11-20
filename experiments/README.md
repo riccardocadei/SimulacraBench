@@ -9,10 +9,11 @@ surveys converted to the competition format, never on competition answers.
 
 ## Data
 
-The public surveys are not redistributed. Build them once, after `scripts/setup.sh`:
+The public surveys come from their publishers (links and licences in the main README). Build them once, after
+`scripts/setup.sh`; place the Arab Barometer file at `bench/_raw/arab_barometer_w8.sav` first:
 
 ```bash
-python scripts/build_bench.py                       # Afrobarometer, Arab Barometer (if its file was placed by hand)
+python scripts/build_bench.py                       # Afrobarometer (downloaded) and Arab Barometer
 python scripts/build_bench.py --only wgm_unicef     # Wellcome Global Monitor, UNICEF-like questions
 ```
 

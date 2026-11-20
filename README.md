@@ -70,10 +70,19 @@ kernels are not deterministic. Set `SIMBENCH_FT_EPOCHS` to pin the passes.
 
 ## Public surveys used for method selection
 
-No competition answers ever left the organizers' run. Every design choice was selected on public surveys converted
-to the competition format: Afrobarometer Round 9 (stands in for World Bank), Arab Barometer Wave VIII (UNHCR) and
-the Wellcome Global Monitor 2020 (UNICEF). Their licences do not allow redistribution, so this repository ships the
-conversion scripts only; `scripts/build_bench.py` documents the sources and downloads what can be downloaded.
+No competition answers ever left the organizers' run. Every design choice was selected on three public surveys
+converted to the competition format. They are not copied here; each is available from its publisher:
+
+| Survey | Stands in for | Where to get it | Licence |
+|---|---|---|---|
+| Afrobarometer Round 9, merged file | World Bank | [afrobarometer.org/data/merged-data](https://www.afrobarometer.org/data/merged-data/) | free with attribution |
+| Arab Barometer Wave VIII | UNHCR | [arabbarometer.org/survey-data/data-downloads](https://www.arabbarometer.org/survey-data/data-downloads/) | free for research with citation |
+| Wellcome Global Monitor 2020 | UNICEF | [wellcome.org/reports/wellcome-global-monitor-covid-19/2020](https://wellcome.org/reports/wellcome-global-monitor-covid-19/2020) | CC BY-NC-ND 4.0 |
+
+`scripts/build_bench.py` downloads the Afrobarometer and Wellcome files itself and converts all three. The Arab
+Barometer file sits behind a short form: download the Wave VIII SPSS file by hand and save it as
+`bench/_raw/arab_barometer_w8.sav` before running the script. `experiments/README.md` gives the commands for the
+splits used in the report.
 
 ## About `submission/main.py`
 
