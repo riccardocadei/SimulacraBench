@@ -1,0 +1,9 @@
+# Local development only (the grader image ships its own torch, numpy, pandas, scikit-learn, huggingface_hub)
+numpy==2.1.3
+pandas==2.2.3
+pyarrow
+PyYAML
+scipy
+scikit-learn
+joblib
+pyreadstat==1.3.6  # scripts/build_bench.py only: reads the SPSS survey files

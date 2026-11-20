@@ -1,0 +1,7 @@
+# Pinned; the hosted image already has torch, numpy, pandas, scikit-learn, huggingface_hub.
+tabicl==2.2.0
+tabpfn==9.0.0
+tabfm==1.0.1
+absl-py==2.5.0
+jaxtyping==0.2.38
+typeguard==2.13.3

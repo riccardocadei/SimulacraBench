@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# cloned by scripts/setup.sh
+starter-kit/
+# generated
+sandboxes/
+dist/
+results/
+# public-survey data: licences forbid redistribution
+bench/
+# pretrained weights: fetched by scripts/fetch_weights.sh
+submission/weights/*.safetensors
+submission/weights/*.ckpt
